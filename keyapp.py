@@ -26,7 +26,7 @@ class KeyWatcher(threading.Thread):
         self.keys = []
         self.record = record
         self.rec_time = rec_time
-        os.chdir("C:\\home\\宮本\\研究関連\\human_keyboardWatcher-master\\keyboardpressure")
+        os.chdir("C:\\Users\\heilab\\Desktop\\Arduino_practice\\keyvib")
         if self.record:
             print("key recording start...")
             self.folder_path = record
@@ -71,32 +71,31 @@ class KeyWatcher(threading.Thread):
         hk.handler = handle_events  # add a new shortcut ctrl+a, or triggered on mouseover of (300,400)
         hk.hook()  # hook into the events, and listen to the press
 
-'''
-if __name__ == '__main__':
-    
-    watcher = KeyWatcher(record='./record/info')
-    watcher.start()
-
-    while True:
-        a = 1
-'''
 def arduino(sec):
+    print("arduino is working")
+    ser1 = serial.Serial("COM1")  # COMポート(Arduino接続)
+    xg = [0]*100              # 温度格納
+    yg = [0]*100            # 温度格納
+    zg = [0]*100
+    t = np.arange(0,100,1)
+    
     while True:
         start_time = time.time()
         f1 = open(str(start_time) + "_keyvib.csv","w")
-    while True:
-        deg_str_ls1 = ser1.readline().decode().rstrip("\r\n")
-        deg_str_j1 = str(time.time()) + "," + str(deg_str_ls1) + "\n"
-        f1.write(deg_str_j1)
-        
-        if time.time() - start_time > sec:
-            f1.close()
-            break
+        while True:
+            deg_str_ls1 = ser1.readline().decode().rstrip("\r\n")
+            deg_str_j1 = str(time.time()) + "," + str(deg_str_ls1) + "\n"
+            f1.write(deg_str_j1)
+
+            if time.time() - start_time > sec:
+                f1.close()
+                break
 
 def watch(record, sec):
+    print("watch is working")
     watcher = KeyWatcher(record, rec_time=sec)
     watcher.start()
-#    arduino()
+#    arduino(sec)
     while True:
         try:
             while True:
@@ -104,43 +103,30 @@ def watch(record, sec):
         except KeyboardInterrupt:
             while True:
                 print("END...")
-#                now = time.time() * 1000
-#                with open(self.folder_path + '/output_' + str(int(self.recording_time)) + '.csv', 'w') as f:
-#                    writer = csv.writer(f, lineterminator='\n') 
-#                    writer.writerows(self.keys)
-#                self.keys = []
-#                self.recording_time = now
                 sys.exit()
 
-#if __name__ == '__main__':
-#    argp = argparse.ArgumentParser()
-#    argp.add_argument("mode",
-#                        help="Mode of data management. (base/audio/sensingroom, base: get typing info, audio: get sound of typing, sensingroom: send typing features using socket comm.")
-#    argp.add_argument("--host", dest="host", default="192.168.11.7", help="host address for sending typing info in send mode (default: 192.168.11.7)")
-#    argp.add_argument("-r", "--record", dest="record", action="store_true", help="recording typing key data (default: false)")
-#    argp.add_argument("-s", "--sec", dest="sec", default=10, help="interval sec of recording")
+if __name__ == '__main__':
+    sec = 10
+    record = './record/info'
+    print("get typing info and sound")
+    thread_1 = threading.Thread(target=watch(record,sec))
+    thread_2 = threading.Thread(target=arduino(sec))
 
-#    args = argp.parse_args()
-#    mode = args.mode
-#    sec = float(args.sec)
-
-#    if str(mode) == "base":
-#        print("get typing info")
-#        watch('./record/info' if args.record else False, sec)
-#    elif str(mode) == "sound":
-#        print("get typing sound")
-#        listen(sec)
-#    elif str(mode) == "all":
-print("get typing info and sound")
-sec = 60
-watch('./record/info', sec)
-#watch_listen('./record/info', sec)
- #   elif str(mode) == "sensingroom":
-#        print("send info using socket communication")
-#        send()
-#    else:
-#        print("Please input correct mode.\n")
-#        print(argp.parse_args('-h'.split()))
+    thread_1.start()
+    thread_2.start()
 
 
-#hoge
+
+'''
+while True:
+    while True:
+        if(time.time()/60 == 0)
+
+start = time.time()
+num=0
+while True:
+    if time.time()-start > num*60:
+        save(flag)
+        num+=1
+    watch()
+'''
